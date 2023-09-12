@@ -191,7 +191,6 @@ class CWSD:
         # Если переполнено все УЗВ, то сообщим об ошибке и завершим работу
         if self.biomass / (self.pool_area * self.number_pools) >=\
                 self.max_planting_density:
-            print('Все УЗВ переполнено, ошибка в начальном заполнении УЗВ!')
             return None
 
         # Если есть переполненные бассейны - распределим рыбу
