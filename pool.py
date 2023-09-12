@@ -50,7 +50,7 @@ class Pool:
         # Обновим информацию о рыбе в бассейне
         self._update_info()
 
-    def remove_fish(self, number_fish: int, biggest_fish: bool = True) -> list[Fish]:
+    def remove_fish(self, number_fish: int, biggest_fish: bool = True) -> ListFish:
         """
         Метод для удаления рыбы из бассейна.
         :param number_fish: Количество удаляемых рыб.
@@ -77,7 +77,7 @@ class Pool:
             # Обновим информацию о рыбе в бассейне
             self._update_info()
 
-            return removed_fish
+            return ListFish(removed_fish)
 
     def daily_growth(self) -> dict[str, float]:
         """
