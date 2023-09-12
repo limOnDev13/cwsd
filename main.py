@@ -1,4 +1,4 @@
-from fish import Fish
+from fish import Fish, ListFish
 from cwsd import CWSD
 
 from datetime import date
@@ -14,16 +14,16 @@ cwsd: CWSD = CWSD(
     start_date=date.today()
 )
 
-numbers: list[int] = [1000 for _ in range(number_pools - 1)]
+numbers: list[int] = [800 for _ in range(number_pools - 1)]
 numbers.append(600)
 
 masses: list[float] = [50, 100, 150, 200]
 
-lists_fishes: list[list[Fish]] = list()
+lists_fishes: list[ListFish] = list()
 
 cwsd.print()
 for index in range(number_pools):
-    fishes: list[Fish] = [Fish(masses[index]) for _ in range(numbers[index])]
+    fishes: ListFish = ListFish([Fish(masses[index]) for _ in range(numbers[index])])
     cwsd.add_fish(fishes)
 cwsd.print()
 
