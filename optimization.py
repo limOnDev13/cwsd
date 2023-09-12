@@ -1,0 +1,46 @@
+from cwsd import CWSD
+from fish import Fish, ListFish
+from datetime import date
+
+
+class Optimization:
+    def __init__(self, number_pools: int, pool_area: float, max_planting_density: float, commercial_fish_mass: float,
+                 min_package: int):
+        self.number_pools: int = number_pools
+        self.pool_area: float = pool_area
+        self.max_planting_density: float = max_planting_density
+        self.commercial_fish_mass: float = commercial_fish_mass
+        self.min_package: int = min_package
+        self.start_date: date = date.today()
+
+    def create_cwsd(self) -> CWSD:
+        return CWSD(
+            number_pools=self.number_pools,
+            pool_area=self.pool_area,
+            max_planting_density=self.max_planting_density,
+            commercial_fish_mass=self.commercial_fish_mass,
+            min_package=self.min_package,
+            start_date=self.start_date
+        )
+
+    @staticmethod
+    def create_list_fish(number_fish: int, mass: float) -> ListFish:
+        fishes: list[Fish] = [Fish(mass) for _ in range(number_fish)]
+        return ListFish(fishes)
+
+    def calculate_growing_time(self, mass: float, number_fish: int) -> int:
+        """
+        Метод для расчета длительности выращивания с такой средней массой.
+        :param mass: Средняя масса рыбки.
+        :param number_fish: Количество рыбок, по которому нужно усреднять.
+        :return: Количество дней
+        """
+        list_fish: ListFish = self.create_list_fish(mass=mass, number_fish=number_fish)
+        days: int = 0
+
+        while list_fish.get_mass(min=True) < self.commercial_fish_mass:
+            for fish in list_fish.list_fish:
+                fish.daily_growth()
+            days += 1
+
+        return days
