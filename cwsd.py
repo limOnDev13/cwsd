@@ -1,5 +1,5 @@
 from datetime import date
-from fish import Fish
+from fish import Fish, ListFish
 from pool import Pool
 
 
@@ -50,7 +50,7 @@ class CWSD:
                     pool.mass_index = number
                     break
 
-    def add_fish(self, fishes: list[Fish]):
+    def add_fish(self, fishes: ListFish):
         """
         Метод для добавления новой рыбы в какой-нибудь пустой бассейн.
         :param fishes: Список новой рыбы.
@@ -70,7 +70,7 @@ class CWSD:
         else:
             print('Пока нет ни одного пустого бассейна.')
 
-    def sell_fish(self) -> list[Fish] | None:
+    def sell_fish(self) -> ListFish | None:
         """
         Если есть достаточно много товарной рыбы, этот метод ее продает.
         :return: Список проданной рыбы. Если таковой нет, то None.
@@ -95,11 +95,10 @@ class CWSD:
         if (number_commercial_fish >= self.min_package) or\
                 (number_commercial_fish == commercial_pool.number_fish):
             # Удалим рыбу из бассейна
-            sold_fish: list[Fish] = commercial_pool.remove_fish(number_commercial_fish)
+            sold_fish: ListFish = commercial_pool.remove_fish(number_commercial_fish)
 
             # Обновим информацию о проданной рыбе
-            for fish in sold_fish:
-                self.sold_biomass += fish.mass / 1000
+            self.sold_biomass += sold_fish.get_biomass()
             # Обновим массовые индексы в бассейнах
             self._update_mass_indexes()
 
@@ -143,13 +142,13 @@ class CWSD:
             overflowed_pool.number_fish * percent / 100 / 2)
 
         if previous_pool is not None:
-            slow_growing_fish: list[Fish] = overflowed_pool.remove_fish(
+            slow_growing_fish: ListFish = overflowed_pool.remove_fish(
                 number_fish_to_be_removed, biggest_fish=False)
             print(f'Переместим {number_fish_to_be_removed} медленно растущих рыб из'
                   f' {index_overflowed_pool} бассейна в {previous_pool.mass_index}.')
             previous_pool.add_new_fishes(slow_growing_fish)
         if next_pool is not None:
-            fast_growing_fish: list[Fish] = overflowed_pool.remove_fish(
+            fast_growing_fish: ListFish = overflowed_pool.remove_fish(
                 number_fish_to_be_removed)
             print(f'Переместим {number_fish_to_be_removed} быстро растущих рыб из'
                   f' {index_overflowed_pool} бассейна в {next_pool.mass_index}.')
@@ -174,11 +173,10 @@ class CWSD:
             spent_feed += pool_result['spent_feed']
 
         # Если есть, продадим товарную рыбу
-        sold_fish: list[Fish] | None = self.sell_fish()
+        sold_fish: ListFish | None = self.sell_fish()
         sold_biomass: float = 0.0
         if sold_fish is not None:
-            for fish in sold_fish:
-                sold_biomass += fish.mass / 1000
+            sold_biomass = sold_fish.get_biomass()
 
         # Обновим информацию о рыбе в УЗВ
         self.biomass += biomass_increase - sold_biomass
