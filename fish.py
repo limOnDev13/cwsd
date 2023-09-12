@@ -94,3 +94,22 @@ class ListFish:
         :return: Количество рыб в списке
         """
         return len(self.list_fish)
+
+    def get_mass(self, min: bool = False, max: bool = False, average: bool = False) -> float:
+        """
+        Метод для получения минимальной, максимальной и средней массы.
+        :param min: Вывести минимум.
+        :param max: Вывести максимум.
+        :param average: Вывести среднюю.
+        :return: Минимальная или максимальная, или средняя масса.
+        """
+        self.list_fish.sort(key=lambda fish: fish.mass)
+        if min:
+            return self.list_fish[0].mass
+        elif max:
+            return self.list_fish[-1].mass
+        elif average:
+            mass: float = 0.0
+            for fish in self.list_fish:
+                mass += fish.mass
+            return mass / len(self.list_fish)
