@@ -27,7 +27,7 @@ class Fish:
                                                             standard_deviation)
         return mass_accumulation_coefficient
 
-    def __init__(self, start_mass: float, feed_ratio: float):
+    def __init__(self, start_mass: float, feed_ratio: float = 1.5):
         self.mass: float = start_mass  # текущая масса
         self.feed_ratio: float = feed_ratio  # кормовой коэффициент
         self._mac: float = self._calculate_random_mac()  # коэффициент массонакопления

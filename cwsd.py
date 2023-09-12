@@ -16,6 +16,7 @@ class CWSD:
         :param min_package: Минимальный размер пакета на продажу.
         """
         self.number_pools: int = number_pools
+        self.pool_area: float = pool_area
         self.start_date: date = start_date
 
         self.commercial_fish_mass: float = commercial_fish_mass
@@ -72,7 +73,7 @@ class CWSD:
     def sell_fish(self) -> list[Fish] | None:
         """
         Если есть достаточно много товарной рыбы, этот метод ее продает.
-        :return: Список проданной рыбы.
+        :return: Список проданной рыбы. Если таковой нет, то None.
         """
         # Найдем товарный бассейн
         commercial_pool: Pool = self.pools[0]
@@ -99,9 +100,115 @@ class CWSD:
             # Обновим информацию о проданной рыбе
             for fish in sold_fish:
                 self.sold_biomass += fish.mass / 1000
+            # Обновим массовые индексы в бассейнах
+            self._update_mass_indexes()
 
             # вернем список проданной рыбы
             return sold_fish
         # Если выросло недостаточно, то вернем None
         else:
             return None
+
+    def _find_pool_with_mass_index(self, mass_index: int) -> Pool | None:
+        """
+        Метод для поиска бассейна с указанным массовым индексом.
+        :param mass_index: Массовый индекс искомого бассейна.
+        :return: искомый бассейн.
+        """
+        for pool in self.pools:
+            if pool.mass_index == mass_index:
+                return pool
+        # Если бассейна с таким массовым индексом нет, то вернем None
+        return None
+
+    def separate_fish(self, overflowed_pool: Pool, percent: float = 30.0):
+        """
+        Метод для распределения рыбы из переполненного бассейна по соседним
+         (по средней массе)
+        :param overflowed_pool: Переполненный бассейн.
+        :param percent: Процент удаляемой рыбы. Половина от этого процента придется
+         на медленнорастущих, вторая половина - на быстрорастущих. Если бассейн
+          оказался крайним (т.е. с самой большой или самой маленькой рыбой),
+           то удалится только половина процента.
+        :return: Ничего
+        """
+        index_overflowed_pool: int = overflowed_pool.mass_index
+        previous_pool: Pool | None = self._find_pool_with_mass_index(
+            index_overflowed_pool - 1)
+        next_pool: Pool | None = self._find_pool_with_mass_index(
+            index_overflowed_pool + 1)
+
+        # распределим рыбу
+        number_fish_to_be_removed: int = int(
+            overflowed_pool.number_fish * percent / 100 / 2)
+
+        if previous_pool is not None:
+            slow_growing_fish: list[Fish] = overflowed_pool.remove_fish(
+                number_fish_to_be_removed, biggest_fish=False)
+            print(f'Переместим {number_fish_to_be_removed} медленно растущих рыб из'
+                  f' {index_overflowed_pool} бассейна в {previous_pool.mass_index}.')
+            previous_pool.add_new_fishes(slow_growing_fish)
+        if next_pool is not None:
+            fast_growing_fish: list[Fish] = overflowed_pool.remove_fish(
+                number_fish_to_be_removed)
+            print(f'Переместим {number_fish_to_be_removed} быстро растущих рыб из'
+                  f' {index_overflowed_pool} бассейна в {next_pool.mass_index}.')
+            next_pool.add_new_fishes(fast_growing_fish)
+
+        # Обновим информацию о массовых индексах
+        self._update_mass_indexes()
+
+    def daily_growth(self) -> dict[str, float] | None:
+        """
+        Метод для проведения ежедневного выращивания.
+        :return: Словарь с информацией об изменении биомассы,
+         затраченном корме и проданной биомассе. Словарь имеет вид
+          {'biomass_increase': biomass_increase, 'spent_feed': spent_feed,
+           'sold_biomass': sold_biomass}
+        """
+        biomass_increase: float = 0.0
+        spent_feed: float = 0.0
+        for pool in self.pools:
+            pool_result: dict[str, float] = pool.daily_growth()
+            biomass_increase += pool_result['biomass_increase']
+            spent_feed += pool_result['spent_feed']
+
+        # Если есть, продадим товарную рыбу
+        sold_fish: list[Fish] | None = self.sell_fish()
+        sold_biomass: float = 0.0
+        if sold_fish is not None:
+            for fish in sold_fish:
+                sold_biomass += fish.mass / 1000
+
+        # Обновим информацию о рыбе в УЗВ
+        self.biomass += biomass_increase - sold_biomass
+        self.days += 1
+        self.spent_feed += spent_feed
+
+        # Соберем словарь в качестве результата
+        result: dict[str, float] = {'biomass_increase': biomass_increase,
+                                    'spent_feed': spent_feed,
+                                    'sold_biomass': sold_biomass}
+
+        # Если переполнено все УЗВ, то сообщим об ошибке и завершим работу
+        if self.biomass / (self.pool_area * self.number_pools) >=\
+                self.max_planting_density:
+            print('Все УЗВ переполнено, ошибка в начальном заполнении УЗВ!')
+            return None
+
+        # Если есть переполненные бассейны - распределим рыбу
+        for pool in self.pools:
+            if pool.planting_density >= self.max_planting_density:
+                self.separate_fish(pool)
+
+        # Вернем ежедневный результат
+        return result
+
+    def print(self):
+        print(f'Прошло {self.days} дней.\n'
+              f'В УЗВ находится {self.biomass} кг биомассы.\n'
+              f'За это время продано {self.sold_biomass} кг биомассы.\n'
+              f'При этом было потрачено {self.spent_feed} кг корма.')
+        for pool in self.pools:
+            pool.print()
+            print()

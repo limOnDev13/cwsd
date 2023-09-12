@@ -1,16 +1,37 @@
- # This is a sample Python script.
+from fish import Fish
+from cwsd import CWSD
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+from datetime import date
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+number_pools: int = 4
+cwsd: CWSD = CWSD(
+    number_pools=number_pools,
+    pool_area=6.0,
+    max_planting_density=40.0,
+    commercial_fish_mass=450.0,
+    min_package=100,
+    start_date=date.today()
+)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+numbers: list[int] = [1000 for _ in range(number_pools - 1)]
+numbers.append(600)
+
+masses: list[float] = [50, 100, 150, 200]
+
+lists_fishes: list[list[Fish]] = list()
+
+cwsd.print()
+for index in range(number_pools):
+    fishes: list[Fish] = [Fish(masses[index]) for _ in range(numbers[index])]
+    cwsd.add_fish(fishes)
+cwsd.print()
+
+days: int = 1000
+
+for _ in range(days):
+    result = cwsd.daily_growth()
+    if result is None:
+        break
+
+cwsd.print()
