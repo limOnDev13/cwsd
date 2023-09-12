@@ -68,11 +68,29 @@ class Fish:
         print(f'Масса рыбки: {self.mass}')
 
 
-"""
-fish: Fish = Fish(100.0, 1.5)
-days: int = 100
+class ListFish:
+    """
+    Класс для работы со списком объектов Fish
+    """
+    def __init__(self, list_fish: list[Fish]):
+        self.list_fish: list[Fish] = list_fish
 
-for _ in range(days):
-    fish.daily_growth()
-    fish.print()
-"""
+    def get_biomass(self) -> float:
+        """
+        Метод для расчета биомассы списка рыб.
+        :return: Биомасса списка рыб
+        """
+
+        biomass: float = 0.0
+
+        for fish in self.list_fish:
+            biomass += fish.mass / 1000
+
+        return biomass
+
+    def get_number_fish(self) -> int:
+        """
+        Метод для получения количества рыб в списке.
+        :return: Количество рыб в списке
+        """
+        return len(self.list_fish)
