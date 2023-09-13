@@ -113,3 +113,8 @@ class ListFish:
             for fish in self.list_fish:
                 mass += fish.mass
             return mass / len(self.list_fish)
+
+
+def create_list_fish(number_fish: int, mass: float) -> ListFish:
+    fishes: list[Fish] = [Fish(mass) for _ in range(number_fish)]
+    return ListFish(fishes)

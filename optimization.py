@@ -1,6 +1,6 @@
 from cwsd import CWSD
 from pool import Pool
-from fish import Fish, ListFish
+from fish import Fish, ListFish, create_list_fish
 from datetime import date
 
 
@@ -24,11 +24,6 @@ class Optimization:
             start_date=self.start_date
         )
 
-    @staticmethod
-    def create_list_fish(number_fish: int, mass: float) -> ListFish:
-        fishes: list[Fish] = [Fish(mass) for _ in range(number_fish)]
-        return ListFish(fishes)
-
     def calculate_growing_time(self, mass: float, number_fish: int) -> int:
         """
         Метод для расчета длительности выращивания с такой средней массой.
@@ -36,7 +31,7 @@ class Optimization:
         :param number_fish: Количество рыбок, по которому нужно усреднять.
         :return: Количество дней
         """
-        list_fish: ListFish = self.create_list_fish(mass=mass, number_fish=number_fish)
+        list_fish: ListFish = create_list_fish(mass=mass, number_fish=number_fish)
         days: int = 0
 
         amount_growth_fish: int = 0
@@ -67,7 +62,7 @@ class Optimization:
 
         while number_fish <= end_number:
             pool: Pool = Pool(self.pool_area, 0)
-            list_fish: ListFish = self.create_list_fish(number_fish, start_mass)
+            list_fish: ListFish = create_list_fish(number_fish, start_mass)
             pool.add_new_fishes(list_fish)
 
             for _ in range(days):
