@@ -5,26 +5,37 @@ from optimization import Optimization
 from datetime import date
 
 
-number_pools: int = 4
-cwsd: CWSD = CWSD(
-    number_pools=number_pools,
-    pool_area=6.0,
-    max_planting_density=40.0,
-    commercial_fish_mass=450.0,
-    min_package=1000,
-    start_date=date.today()
-)
+number_and_mass: list[list[int]] = [[590, 200], [600, 150], [760, 100], [1200, 50]]
+attempts: int = 100
+success_attempts: int = 0
+failed_attempts: int = 0
 
-cwsd.add_fish(create_list_fish(470, 200))
-cwsd.add_fish(create_list_fish(580, 150))
-cwsd.add_fish(create_list_fish(760, 100))
-cwsd.add_fish(create_list_fish(1300, 50))
+for attempt in range(attempts):
+    print(f'попытка номер {attempt}')
 
-cwsd.print()
+    cwsd: CWSD = CWSD(
+        number_pools=len(number_and_mass),
+        pool_area=6.0,
+        max_planting_density=40.0,
+        commercial_fish_mass=450.0,
+        min_package=1000,
+        start_date=date.today()
+    )
 
-for _ in range(1000):
-    result = cwsd.daily_growth()
-    if result is None:
-        break
+    for i in range(len(number_and_mass)):
+        cwsd.add_fish(create_list_fish(number_and_mass[i][0], number_and_mass[i][1]))
 
-cwsd.print()
+    it_works: bool = True
+    for _ in range(200):
+        result = cwsd.daily_growth(print_info=False)
+        if result is None:
+            it_works = False
+            break
+
+    if it_works:
+        print(f'Все работает!  {number_and_mass}')
+        success_attempts += 1
+    else:
+        failed_attempts += 1
+
+print(f'Из {attempts} попыток {success_attempts} удачных.')
