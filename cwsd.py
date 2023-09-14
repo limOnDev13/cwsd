@@ -70,6 +70,35 @@ class CWSD:
         else:
             print('Пока нет ни одного пустого бассейна.')
 
+    def add_fish_in_not_empty_pool(self, average_mass: float, list_fish: ListFish, print_info: bool = False):
+        """
+        Метод для добавления рыбы в НЕ пустой бассейн. Рыба будет добавляться в бассейн, в котором находится рыба
+         с наиболее близкой средней массой к массе новой рыбы.
+        :param average_mass: Средняя масса добавляемой рыбы.
+        :param list_fish: Список новой рыбы.
+        :param print_info: Показывает, нужно ли печатать в какой бассейн добавили рыбу.
+        :return: Ничего.
+        """
+        # Найдем бассейн со средней массой рыбы наиболее близкой к средней массе новой рыбы
+        min_delta_mass: float = abs(self.pools[0].average_mass - average_mass)
+        chosen_pool: Pool = self.pools[0]
+
+        for pool in self.pools:
+            delta_mass: float = abs(pool.average_mass - average_mass)
+            if delta_mass < min_delta_mass:
+                min_delta_mass = delta_mass
+                chosen_pool = pool
+
+        # Если нужно, напечатаем в какой бассейн добавили рыбу
+        if print_info:
+            print(f'Рыбу добавили в бассейн с массовым индексом {chosen_pool.mass_index}')
+
+        # Добавим в найденный бассейн новую рыбу
+        chosen_pool.add_new_fishes(list_fish)
+        # Обновим информацию о рыбе в бассейне
+        self.biomass += list_fish.get_biomass()
+        self._update_mass_indexes()
+
     def sell_fish(self) -> ListFish | None:
         """
         Если есть достаточно много товарной рыбы, этот метод ее продает.
