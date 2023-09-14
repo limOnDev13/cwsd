@@ -120,7 +120,7 @@ class CWSD:
         # Если бассейна с таким массовым индексом нет, то вернем None
         return None
 
-    def separate_fish(self, overflowed_pool: Pool, percent: float = 30.0):
+    def separate_fish(self, overflowed_pool: Pool, percent: float = 30.0, print_info: bool = True):
         """
         Метод для распределения рыбы из переполненного бассейна по соседним
          (по средней массе)
@@ -129,6 +129,7 @@ class CWSD:
          на медленнорастущих, вторая половина - на быстрорастущих. Если бассейн
           оказался крайним (т.е. с самой большой или самой маленькой рыбой),
            то удалится только половина процента.
+        :param print_info: Показывает, нужно ли печатать информацию о перемещении рыбы.
         :return: Ничего
         """
         index_overflowed_pool: int = overflowed_pool.mass_index
@@ -144,22 +145,25 @@ class CWSD:
         if previous_pool is not None:
             slow_growing_fish: ListFish = overflowed_pool.remove_fish(
                 number_fish_to_be_removed, biggest_fish=False)
-            print(f'Переместим {number_fish_to_be_removed} медленно растущих рыб из'
-                  f' {index_overflowed_pool} бассейна в {previous_pool.mass_index}.')
+            if print_info:
+                print(f'Переместим {number_fish_to_be_removed} медленно растущих рыб из'
+                      f' {index_overflowed_pool} бассейна в {previous_pool.mass_index}.')
             previous_pool.add_new_fishes(slow_growing_fish)
         if next_pool is not None:
             fast_growing_fish: ListFish = overflowed_pool.remove_fish(
                 number_fish_to_be_removed)
-            print(f'Переместим {number_fish_to_be_removed} быстро растущих рыб из'
-                  f' {index_overflowed_pool} бассейна в {next_pool.mass_index}.')
+            if print_info:
+                print(f'Переместим {number_fish_to_be_removed} быстро растущих рыб из'
+                      f' {index_overflowed_pool} бассейна в {next_pool.mass_index}.')
             next_pool.add_new_fishes(fast_growing_fish)
 
         # Обновим информацию о массовых индексах
         self._update_mass_indexes()
 
-    def daily_growth(self) -> dict[str, float] | None:
+    def daily_growth(self, print_info: bool = True) -> dict[str, float] | None:
         """
         Метод для проведения ежедневного выращивания.
+        :param print_info: Показывает, нужно ли печатать информацию о перемещении рыбы.
         :return: Словарь с информацией об изменении биомассы,
          затраченном корме и проданной биомассе. Словарь имеет вид
           {'biomass_increase': biomass_increase, 'spent_feed': spent_feed,
@@ -197,7 +201,7 @@ class CWSD:
         # Если есть переполненные бассейны - распределим рыбу
         for pool in self.pools:
             if pool.planting_density >= self.max_planting_density:
-                self.separate_fish(pool)
+                self.separate_fish(pool, print_info=print_info)
 
         # Вернем ежедневный результат
         return result
