@@ -50,11 +50,11 @@ class CWSD:
                     pool.mass_index = number
                     break
 
-    def add_fish(self, fishes: ListFish):
+    def add_fish(self, fishes: ListFish) -> bool:
         """
         Метод для добавления новой рыбы в какой-нибудь пустой бассейн.
         :param fishes: Список новой рыбы.
-        :return: Ничего.
+        :return: True, если был пустой бассейн и в него добавилась новая рыба. Иначе - False.
         """
         empty_pool: Pool | None = None
 
@@ -67,8 +67,9 @@ class CWSD:
             empty_pool.add_new_fishes(fishes)
             self.biomass += empty_pool.biomass
             self._update_mass_indexes()
+            return True
         else:
-            print('Пока нет ни одного пустого бассейна.')
+            return False
 
     def add_fish_in_not_empty_pool(self, average_mass: float, list_fish: ListFish, print_info: bool = False):
         """
