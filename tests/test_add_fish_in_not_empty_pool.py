@@ -3,7 +3,7 @@ from fish import create_list_fish, ListFish
 from datetime import date
 
 
-number_and_mass: list[list[int]] = [[590, 200], [600, 150], [760, 100], [1200, 50]]
+number_and_mass: list[list[int | float]] = [[590, 200], [600, 150], [760, 100], [1200, 50]]
 
 cwsd: CWSD = CWSD(
     number_pools=len(number_and_mass),
