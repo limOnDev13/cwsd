@@ -150,7 +150,8 @@ class CWSD:
         # Если бассейна с таким массовым индексом нет, то вернем None
         return None
 
-    def _define_pool_is_empty(self, pool: Pool) -> bool:
+    @staticmethod
+    def _pool_is_empty(pool: Pool) -> bool:
         """
         Метод, который определяет, является ли переданный бассейн пустым.
         :param pool: Бассейн, который нужно определить, пустой он или нет.
@@ -183,14 +184,14 @@ class CWSD:
         number_fish_to_be_removed: int = int(
             overflowed_pool.number_fish * percent / 100 / 2)
 
-        if previous_pool is not None:
+        if (previous_pool is not None) and (self._pool_is_empty(previous_pool)):
             slow_growing_fish: ListFish = overflowed_pool.remove_fish(
                 number_fish_to_be_removed, biggest_fish=False)
             if print_info:
                 print(f'Переместим {number_fish_to_be_removed} медленно растущих рыб из'
                       f' {index_overflowed_pool} бассейна в {previous_pool.mass_index}.')
             previous_pool.add_new_fishes(slow_growing_fish)
-        if next_pool is not None:
+        if (next_pool is not None) and (self._pool_is_empty(next_pool)):
             fast_growing_fish: ListFish = overflowed_pool.remove_fish(
                 number_fish_to_be_removed)
             if print_info:
