@@ -2,6 +2,7 @@ from cwsd import CWSD
 from pool import Pool
 from fish import Fish, ListFish, create_list_fish
 from datetime import date
+from copy import deepcopy
 
 
 class Optimization:
@@ -74,3 +75,60 @@ class Optimization:
                 number_fish += step
 
         return number_fish
+
+    @staticmethod
+    def calculate_optimal_number_new_fish_in_current_cwsd(cwsd: CWSD, average_mass: float,
+                                                          start_number: int, step: int, end_number: int,
+                                                          attempts: int = 100) -> int:
+        """
+        Метод для определения оптимального количества рыбы в уже работающее узв.
+        :param cwsd: Работающее УЗВ.
+        :param average_mass: Средняя масса новой рыбы.
+        :param start_number: Начальное значение варьируемого количества.
+        :param step: Шаг вариации.
+        :param end_number: Конечный предел вариации количества.
+        :param attempts: Количество проверок.
+        :return: Оптимальное количество новой рыбы.
+        """
+        number_fish: int = start_number
+        optimal_quantity: int = start_number
+        risk_quantity: int = start_number
+
+        # Сделаем вариацию параметра number_fish
+        while number_fish <= end_number:
+            print(f'Тестируем с {number_fish} рыб массой {average_mass}')
+            success_attempts: int = 0
+
+            for _ in range(attempts):
+                test_cwsd: CWSD = deepcopy(cwsd)
+                list_fish: ListFish = create_list_fish(number_fish, average_mass)
+
+                # Если есть пустой бассейн, добавим в него рыбу
+                if not test_cwsd.add_fish(list_fish):
+                    # Если пустых бассейнов нет, добавим в близкий по средней массе
+                    test_cwsd.add_fish_in_not_empty_pool(average_mass, list_fish)
+
+                # Начнем ежедневную работу, пока биомасса не опуститься ниже 1 кг, или пока не произойдет переполнение
+                success: bool = True
+                while test_cwsd.biomass > 1.0:
+                    result: dict[str, float] | None = test_cwsd.daily_growth(print_info=False)
+
+                    if result is None:
+                        success = False
+                        break
+                if success:
+                    success_attempts += 1
+            print(f'Было {success_attempts} попыток из {attempts}')
+
+            if success_attempts == attempts:
+                optimal_quantity = number_fish
+            if float(success_attempts) / float(attempts) >= 0.9:
+                risk_quantity = number_fish
+                number_fish += step
+            else:
+                print(f'Оптимальное значение количества новой рыбы, при котором не происходит переполнение в {attempts}'
+                      f' из {attempts} случаев, равно {optimal_quantity}.\n'
+                      f'Рискованное значение количества новой рыбы, при котором не происходит переполнение в 90% и выше'
+                      f' (в {success_attempts} случаях из {attempts}), равно {risk_quantity}.')
+                break
+        return optimal_quantity
