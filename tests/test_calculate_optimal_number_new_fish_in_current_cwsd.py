@@ -21,7 +21,7 @@ print()
 
 optimization.calculate_optimal_number_new_fish_in_current_cwsd(
     cwsd=cwsd,
-    average_mass=300.0,
+    average_mass=180.0,
     start_number=100,
     step=10,
     end_number=5000
