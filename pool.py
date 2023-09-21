@@ -101,6 +101,16 @@ class Pool:
 
         return {'biomass_increase': biomass_increase, 'spent_feed': spent_feed}
 
+    def is_empty(self) -> bool:
+        """
+        Метод, который сообщает, является бассейн пустым.
+        :return: True, если бассейн пустой, иначе - False.
+        """
+        if self.number_fish == 0:
+            return True
+        else:
+            return False
+
     def print(self):
         """
         Метод для печати информации о рыбе в бассейне.
