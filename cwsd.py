@@ -248,12 +248,12 @@ class CWSD:
 
         return result_number
 
-
-    def print(self):
+    def print(self, print_full_info: bool = False):
         print(f'Прошло {self.days} дней.\n'
               f'В УЗВ находится {self.biomass} кг биомассы.\n'
               f'За это время продано {self.sold_biomass} кг биомассы.\n'
               f'При этом было потрачено {self.spent_feed} кг корма.')
-        for pool in self.pools:
-            pool.print()
-            print()
+        if print_full_info:
+            for pool in self.pools:
+                pool.print()
+                print()
