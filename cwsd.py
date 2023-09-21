@@ -150,18 +150,6 @@ class CWSD:
         # Если бассейна с таким массовым индексом нет, то вернем None
         return None
 
-    @staticmethod
-    def _pool_is_empty(pool: Pool) -> bool:
-        """
-        Метод, который определяет, является ли переданный бассейн пустым.
-        :param pool: Бассейн, который нужно определить, пустой он или нет.
-        :return: True, если бассейн пустой. Иначе - False.
-        """
-        if pool.number_fish == 0:
-            return True
-        else:
-            return False
-
     def separate_fish(self, overflowed_pool: Pool, percent: float = 30.0, print_info: bool = True):
         """
         Метод для распределения рыбы из переполненного бассейна по соседним
@@ -184,14 +172,14 @@ class CWSD:
         number_fish_to_be_removed: int = int(
             overflowed_pool.number_fish * percent / 100 / 2)
 
-        if (previous_pool is not None) and (self._pool_is_empty(previous_pool)):
+        if (previous_pool is not None) and (not previous_pool.is_empty()):
             slow_growing_fish: ListFish = overflowed_pool.remove_fish(
                 number_fish_to_be_removed, biggest_fish=False)
             if print_info:
                 print(f'Переместим {number_fish_to_be_removed} медленно растущих рыб из'
                       f' {index_overflowed_pool} бассейна в {previous_pool.mass_index}.')
             previous_pool.add_new_fishes(slow_growing_fish)
-        if (next_pool is not None) and (self._pool_is_empty(next_pool)):
+        if (next_pool is not None) and (not next_pool.is_empty()):
             fast_growing_fish: ListFish = overflowed_pool.remove_fish(
                 number_fish_to_be_removed)
             if print_info:
@@ -247,6 +235,19 @@ class CWSD:
 
         # Вернем ежедневный результат
         return result
+
+    def have_empty_pool(self) -> int:
+        """
+        Метод, который считает количество пустых бассейнов.
+        :return: Количество пустых бассейнов.
+        """
+        result_number: int = 0
+        for pool in self.pools:
+            if pool.is_empty():
+                result_number += 1
+
+        return result_number
+
 
     def print(self):
         print(f'Прошло {self.days} дней.\n'
