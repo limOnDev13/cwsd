@@ -79,7 +79,7 @@ class Optimization:
     @staticmethod
     def calculate_optimal_number_new_fish_in_current_cwsd(cwsd: CWSD, average_mass: float,
                                                           start_number: int, step: int, end_number: int,
-                                                          attempts: int = 100) -> int:
+                                                          attempts: int = 100, print_info: bool = False) -> int:
         """
         Метод для определения оптимального количества рыбы в уже работающее узв.
         :param cwsd: Работающее УЗВ.
@@ -88,6 +88,7 @@ class Optimization:
         :param step: Шаг вариации.
         :param end_number: Конечный предел вариации количества.
         :param attempts: Количество проверок.
+        :param print_info: Если нужно писать подробную информацию, то True, иначе - False.
         :return: Оптимальное количество новой рыбы.
         """
         number_fish: int = start_number
@@ -96,7 +97,8 @@ class Optimization:
 
         # Сделаем вариацию параметра number_fish
         while number_fish <= end_number:
-            print(f'Тестируем с {number_fish} рыб массой {average_mass}')
+            if print_info:
+                print(f'Тестируем с {number_fish} рыб массой {average_mass}')
             success_attempts: int = 0
 
             for _ in range(attempts):
@@ -118,7 +120,8 @@ class Optimization:
                         break
                 if success:
                     success_attempts += 1
-            print(f'Было {success_attempts} попыток из {attempts}')
+            if print_info:
+                print(f'Было {success_attempts} попыток из {attempts}')
 
             if success_attempts == attempts:
                 optimal_quantity = number_fish
@@ -126,9 +129,10 @@ class Optimization:
                 risk_quantity = number_fish
                 number_fish += step
             else:
-                print(f'Оптимальное значение количества новой рыбы, при котором не происходит переполнение в {attempts}'
-                      f' из {attempts} случаев, равно {optimal_quantity}.\n'
-                      f'Рискованное значение количества новой рыбы, при котором не происходит переполнение в 90% и выше'
-                      f' (в {success_attempts} случаях из {attempts}), равно {risk_quantity}.')
+                if print_info:
+                    print(f'Оптимальное значение количества новой рыбы, при котором не происходит переполнение в'
+                          f' {attempts} из {attempts} случаев, равно {optimal_quantity}.\n'
+                          f'Рискованное значение количества новой рыбы, при котором не происходит переполнение в 90% и'
+                          f' выше (в {success_attempts} случаях из {attempts}), равно {risk_quantity}.')
                 break
         return optimal_quantity
